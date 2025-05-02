@@ -3,6 +3,7 @@ import {useNavigate} from "react-router-dom";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import api from "@/lib/axios";
+import {Separator} from "@/components/ui/separator.tsx";
 
 interface Hunt {
     id: number;
@@ -100,7 +101,7 @@ export function DashboardPage() {
                         <Button onClick={async () => {
                             const response = await api.post(`/reviewers/hunts/${hunt.id}`);
                             if (response.status !== 200) {
-                                alert("Fuck you")
+                                alert("Something went wrong.");
                                 return;
                             }
                             await fetchHunts();
@@ -151,7 +152,7 @@ export function DashboardPage() {
                     >
                         REVIEW DETAILS
                     </Button>
-                ): null}
+                ) : null}
             </CardFooter>
         </Card>
     );
@@ -168,7 +169,7 @@ export function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h2 className="text-xl font-semibold mb-4">Available Hunts</h2>
+                    <h2 className="text-xl font-semibold mb-4">Available Hunts To Review</h2>
                     {isLoading ? (
                         <p>Loading available hunts...</p>
                     ) : availableHunts?.length > 0 ? (
@@ -185,9 +186,26 @@ export function DashboardPage() {
                     {isLoading ? (
                         <p>Loading assigned hunts...</p>
                     ) : assignedHunts?.length > 0 ? (
-                        assignedHunts.map((hunt) => {
-                            return renderHuntCard(hunt, true);
-                        })
+                        assignedHunts
+                            .filter((hunt) => hunt.huntStatus === "UNDER_REVIEW")
+                            .map((hunt) => {
+                                return renderHuntCard(hunt, true);
+                            })
+                    ) : (
+                        <p>No assigned hunts found.</p>
+                    )}
+
+                    <Separator className={"border-2"} />
+
+                    <h2 className="text-xl font-semibold mb-4">Approved Hunts</h2>
+                    {isLoading ? (
+                        <p>Loading assigned hunts...</p>
+                    ) : assignedHunts?.length > 0 ? (
+                        assignedHunts
+                            .filter((hunt) => hunt.huntStatus === "APPROVED")
+                            .map((hunt) => {
+                                return renderHuntCard(hunt, true);
+                            })
                     ) : (
                         <p>No assigned hunts found.</p>
                     )}

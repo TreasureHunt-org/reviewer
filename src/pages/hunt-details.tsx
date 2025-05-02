@@ -261,24 +261,43 @@ export function HuntDetailsPage() {
                 >
                     &larr; Back to Dashboard
                 </Button>
-                <Button className={"bg-red-500 hover:bg-red-600"}
-                        onClick={async () => {
-                            const response = await api.post(`/reviewers/hunts/${hunt.id}`);
-                            if (response.status !== 200) {
-                                alert("Fuck you")
-                                return;
-                            }
-                            navigate("/");
-                        }}>
-                    Unassign me
-                </Button>
+                {
+                    hunt.huntStatus === "UNDER_REVIEW" && (
+                        <div className={"flex gap-x-3"}>
+                            <Button className={"bg-cyan-700 hover:bg-cyan-800"}
+                                    onClick={async () => {
+                                        const response = await api.post(`/reviewers/hunts/${hunt.id}/approve`);
+                                        if (response.status !== 200) {
+                                            alert("Something went wrong!")
+                                            return;
+                                        }
+                                        navigate("/");
+                                    }}>
+                                Approve
+                            </Button>
+
+                            <Button className={"bg-red-500 hover:bg-red-600"}
+                                    onClick={async () => {
+                                        const response = await api.post(`/reviewers/hunts/${hunt.id}`);
+                                        if (response.status !== 200) {
+                                            alert("Something went wrong!")
+                                            return;
+                                        }
+                                        navigate("/");
+                                    }}>
+                                Unassign me
+                            </Button>
+                        </div>
+                    )
+                }
             </div>
             <Card className="mb-6">
                 <div
                     // className="absolute inset-0 opacity-20 bg-cover bg-center"
-                    style={{ backgroundImage: "url('/path-to-your-treasure-map.png')" }}
+                    style={{backgroundImage: "url('/path-to-your-treasure-map.png')"}}
                 >
-                    <img src={`http://localhost:8080/api/v1/treasure-hunt/hunts/${hunt.id}/images/bg`} alt="hunt background"/>
+                    <img src={`http://localhost:8080/api/v1/treasure-hunt/hunts/${hunt.id}/images/bg`}
+                         alt="hunt background"/>
                 </div>
                 <CardHeader>
                     <CardTitle className="text-2xl">{hunt.title}</CardTitle>
@@ -307,7 +326,7 @@ export function HuntDetailsPage() {
                             <div className="col-span-2">
                                 <span
                                     className="font-semibold">Location:</span> {hunt.location.latitude.toFixed(6)}, {hunt.location.longitude.toFixed(6)}
-                                <Map lat={hunt.location.latitude} lng={hunt.location.longitude} />
+                                <Map lat={hunt.location.latitude} lng={hunt.location.longitude}/>
                             </div>
                         )}
                     </div>
@@ -322,16 +341,23 @@ export function HuntDetailsPage() {
             )}
 
 
-            <h2 className="text-xl font-semibold mb-4">Add a Comment</h2>
-            <form onSubmit={handleCommentSubmit} className="mb-6">
+            {
+                hunt.huntStatus === "UNDER_REVIEW" && (
+                    <>
+                        <h2 className="text-xl font-semibold mb-4">Add a Comment</h2>
+                        <form onSubmit={handleCommentSubmit} className="mb-6">
         <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             className="w-full min-h-40 p-2 border rounded mb-2"
             placeholder="Write your comment here..."
         />
-                <Button type="submit" className="w-full">Submit Comment</Button>
-            </form>
+                            <Button type="submit" className="w-full">Submit Comment</Button>
+                        </form>
+                    </>
+                )
+            }
+
 
             {
                 comments.length > 0 ? (
